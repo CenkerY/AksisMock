@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<!-- saved from url=(0159)https://cdn0.istanbul.edu.tr/Photo.aspx?app=678EFB0041F34574B9C9A196A9DD936E&i=K8qH8jbOMbuP8Vcln%2by8V9AMN7HQ8GcA0272DFIc4OD9gm%2blvRykQQ%3d%3d&t=1&w=150&h=200 -->
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>
+
+</title>
+
+    <!-- BOOTSTRAP CSS (REQUIRED ALL PAGE)-->
+    <link href="./bootstrap.min.css" rel="stylesheet"><link href="./font-awesome.min.css" rel="stylesheet"><link href="./style.css" rel="stylesheet"><link href="./style-responsive.css" rel="stylesheet"><link href="./toastr.css" rel="stylesheet">
+
+    <style type="text/css">
+        body {
+            padding-top: 0px;
+        }
+        #target {
+            *max-height:400px;
+            *max-width: 600px;
+        }
+        .button-bar a {
+            margin-top:5px;
+            margin-right:5px;
+        }
+        .jcrop-holder img,img.jcrop-preview {
+            max-width: none;
+        }
+        .jcrop-holder img, #avatar-crop-pane img { max-width: none; } 
+        #target{
+            width:100%;
+            height:auto;
+        }
+
+        #overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    filter:alpha(opacity=50);
+    -moz-opacity:0.5;
+    -khtml-opacity: 0.5;
+    opacity: 0.5;
+    z-index: 10000;
+}
+
+    </style>
+
+    <!-- MAIN JAVASRCIPT (REQUIRED ALL PAGE)-->
+    <script src="./jquery.min.js.download"></script><style>undefined</style>
+    
+    <script src="./bootstrap.min.js.download"></script>
+    <script src="./retina.min.js.download"></script>
+    <script src="./jquery.nicescroll.js.download"></script>
+    <script src="./jquery.slimscroll.min.js.download"></script>
+    <script src="./jquery.backstretch.min.js.download"></script>
+
+    
+
+     <link href="./jquery.Jcrop.min.css" rel="stylesheet">
+    <script src="./jquery.Jcrop.min.js.download"></script>
+    <script src="./jquery.color.js.download"></script>
+
+    
+
+
+
+    
+
+   
+    <script src="./jquery.ba-bbq.min.js.download"></script>
+
+    <script src="./jquery.ui.widget.js.download"></script>
+    <script src="./jquery.iframe-transport.js.download"></script>
+    <script src="./jquery.fileupload.js.download"></script>
+    
+    <script src="./jquery.fileupload-process.js.download"></script>
+    <script src="./toastr.js.download"></script>
+    <script type="text/javascript">
+        var offset = 0;
+        function calcOffset() {
+            var xmlhttp = new XMLHttpRequest();
+            xmlhttp.open("GET", "/Handlers/TimeHandler.ashx", false);
+            xmlhttp.send();
+
+            var dateStr = xmlhttp.getResponseHeader('Date');
+            var serverTimeMillisGMT = Date.parse(new Date(Date.parse(dateStr)).toUTCString());
+            var localMillisUTC = Date.parse(new Date().toUTCString());
+
+            offset = serverTimeMillisGMT - localMillisUTC;
+            console.log("offset", offset);
+        }
+
+        calcOffset();
+
+        function getServerTime() {
+            var date = new Date();
+
+            date.setTime(date.getTime() + offset);
+
+            return date;
+        }
+    </script>
+    <script type="text/javascript">
+
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": true,
+            "progressBar": false,
+            "positionClass": "toast-bottom-full-width",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "5000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        };
+
+        var crop_ref;
+        var file;
+        var height = 0;
+
+        var params = $.deparam.querystring();
+        var calcOptions = {
+            aspectRatio: params.w / params.h,
+            minSize: [params.w /4, params.h / 4],
+            setSelect: [0, 0, params.w / 4, params.h / 4]
+        };
+        var cropOptions = $.extend({}, {
+            //defaults
+            bgOpacity: 0.3,
+            bgFade: true,
+            aspectRatio: 1,
+            minSize: [100, 100],
+            //boxWidth: $(window).width() - 10,
+            //boxHeight: ($(window).width() - 10) / 600 * 380,
+            //boxWidth: 600,
+            //boxHeight: 380,
+            //trueSize: [611, 694],
+            setSelect: [0, 0, 100, 100]
+        }, calcOptions);
+
+        console.log(cropOptions);
+
+
+
+        function getWrapper() {
+            return $('<div/>').css({ height: 0, width: 0, 'overflow': 'hidden' });
+        }
+
+        function wrapInput() {
+            var wrapper = getWrapper();
+            var fileInput = $('#fileupload').wrap(wrapper);
+
+            fileInput.on("change", function () {
+                $this = $(this);
+                //$('#chooseFile').text($this.val());
+            });
+
+            //$('#chooseFile').on("click", function () {
+            //    fileInput.click();
+            //}).show();
+
+            return fileInput;
+        }
+
+        function bindJcrop() {
+            console.log(cropOptions);
+            $('#target').replaceWith('<img id="target" src="' + $('#target').attr("src") + '"/>');
+            $('#target').Jcrop(cropOptions, function () {
+                crop_ref = this;
+            });
+        }
+
+        function readURL(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#target').attr('src', e.target.result);
+                    //alert("bind");
+                    bindJcrop();
+                    //$("#xx").html("Ready !");
+                    //$("#overlay").remove();
+                }
+
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        var createCookie = function (name, value, days) {
+            var expires;
+            if (days) {
+                var date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toGMTString();
+            }
+            else {
+                expires = "";
+            }
+            document.cookie = name + "=" + value + expires + "; path=/";
+        }
+
+        function getCookie(c_name) {
+            if (document.cookie.length > 0) {
+                c_start = document.cookie.indexOf(c_name + "=");
+                if (c_start != -1) {
+                    c_start = c_start + c_name.length + 1;
+                    c_end = document.cookie.indexOf(";", c_start);
+                    if (c_end == -1) {
+                        c_end = document.cookie.length;
+                    }
+                    return unescape(document.cookie.substring(c_start, c_end));
+                }
+            }
+            return "";
+        }
+
+        $(document).ready(function () {
+            var fileInput;
+            var wrapper = getWrapper();
+            fileInput = $('#fileupload').wrap(wrapper);
+
+            $("#selectFile").on("click", function () {
+                var wrapper = getWrapper();
+                var fileInput = $('#fileupload').wrap(wrapper);
+                fileInput.click();
+                $('#fileupload').fileupload();            
+            });
+
+            fileInput.on("change", function () {
+                //$("#xx").html("Loading...");
+                //$('<div id="overlay"> </div>').appendTo($(".jcrop-holder"));
+                
+                $("#target").removeAttr("style");
+                if (crop_ref != undefined) {
+                    crop_ref.destroy();
+                    //$("#target").removeAttr("style");
+                }
+
+                cropOptions.boxWidth = $('#target').width();
+                cropOptions.boxHeight = $('#target').height();
+
+                readURL(this);
+                $this = $(this);
+                file = this.files[0];
+            });
+
+            $("#upload").on("click", function () {
+                //var formData = crop_ref.tellSelect();
+                var formData = crop_ref.tellScaled();
+                //var boxWidth = crop_ref.getOptions().boxWidth;
+                //var boxHeight = crop_ref.getOptions().boxHeight;
+                var boxWidth = $(".jcrop-holder img:first").width();
+                var boxHeight = $(".jcrop-holder img:first").height();
+                
+                $.each(formData, function (key, value) {
+                    formData[key] = Math.round(value);
+                });
+                //var t2 = crop_ref.tellScaled();
+                formData["i"] = params.i;
+                formData["t"] = params.t;
+                formData["app"] = params.app;
+                formData["boxWidth"] = boxWidth;
+                formData["boxHeight"] = boxHeight;
+                console.log(formData);
+                //$('#fileupload').fileupload('send', { files: file, formData: formData, url: "FileService/UploadHandler.ashx" })
+                $('#fileupload').fileupload('send', { files: file, formData: formData, url: "UploadHandler.ashx" })
+                    .success(function (result, textStatus, jqXHR) {
+                        toastr["success"]("İşleminiz tamamlandı");
+                        //$("#xx").html("Saved...");
+                        //if (result.status == true) {
+                        //    var timestamp = new Date().getTime();
+                        //    $("img.kimlik-profileImage").attr('src', $("img.kimlik-profileImage").attr('src') + '&uid=' + timestamp);
+                        //    dialogRef.dialog("close");
+                        //} else {
+                        //    alert("İşleminiz sırasında bir hata oluştu.");
+                        //}
+                        //var timeStamp = getServerTime().getTime();
+                        //createCookie("mdfDate", timeStamp, 365);
+                    })
+                    .error(function (jqXHR, textStatus, errorThrown) {
+                        //alert("İşleminiz sırasında bir hata oluştu.");
+                        //console.log(jqXHR); console.log(textStatus); console.log(errorThrown);
+                        toastr["error"]("İşleminiz sırasında bir hata oluştu");
+                    })
+                    .complete(function (result, textStatus, jqXHR) {
+                        /* ... */
+                    });
+            });
+        });
+    </script>
+<link rel="preconnect" href="https://fonts.googleapis.com/" crossorigin="use-credentials"><link rel="preconnect" href="https://fonts.gstatic.com/"><link rel="stylesheet" href="./css2"></head>
+<body data-new-gr-c-s-check-loaded="14.1145.0" data-gr-ext-installed="">
+    <form method="post" action="https://cdn0.istanbul.edu.tr/Photo.aspx?app=678EFB0041F34574B9C9A196A9DD936E&amp;i=K8qH8jbOMbuP8Vcln%2by8V9AMN7HQ8GcA0272DFIc4OD9gm%2blvRykQQ%3d%3d&amp;t=1&amp;w=150&amp;h=200" id="form1">
+<div class="aspNetHidden">
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="t5F6IYVhNXUYy6HLV3FdAJav9YKzlurB+ijaG14xfEIV4IrFIDmPzIRGYCTR70tG34C7ErCPe5k55UfuoOQXx5O5mZm1pKWusrmO8FB9GeE=">
+</div>
+
+<div class="aspNetHidden">
+
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="13F0A163">
+</div>
+        <div class="row" style="padding: 5px;">
+            <div class="col-sm-9 col-md-9">
+                <div class="form-group image-holder">
+                    
+                    
+                    <img id="target" src="./default.jpg" class="" alt="Image">
+                </div>
+                
+
+            </div>
+            <div class="col-sm-3 col-md-3">
+                <p class="right-button pull-left">
+                    <a id="selectFile" class="btn btn-info ">Dosya Seç</a>
+                    <a id="upload" class="btn btn-info ">Kaydet</a>
+                </p>
+                <div style="clear:both;"></div>
+                
+                
+            </div>
+            
+        </div>
+        <div style="height: 0px; width: 0px; overflow: hidden;"><input id="fileupload" type="file" name="files[]" multiple="multiple" style="display: none;"></div>
+        
+    </form>
+
+
+</body><grammarly-desktop-integration data-grammarly-shadow-root="true"><template shadowrootmode="open"><style>
+      div.grammarly-desktop-integration {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select:none;
+        user-select:none;
+      }
+
+      div.grammarly-desktop-integration:before {
+        content: attr(data-content);
+      }
+    </style><div aria-label="grammarly-integration" role="group" tabindex="-1" class="grammarly-desktop-integration" data-content="{&quot;mode&quot;:&quot;limited&quot;,&quot;isActive&quot;:false,&quot;isUserDisabled&quot;:false}"></div></template></grammarly-desktop-integration></html>
